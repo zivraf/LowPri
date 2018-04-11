@@ -13,10 +13,10 @@ Instructions:
 - After a few minutes the VM Scale Set capacity will increase. 
 - You can stop doing work by browsing to {publicIP}/stop_work.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fzivraf%2LowPri%2Fmaster%2F301-vmss-low-pri-bottle-hybrid-autoscale%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fzivraf%2FLowPri%2Fmaster%2F301-vmss-low-pri-bottle-hybrid-autoscale%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
     </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fzivraf%2LowPri%2Fmaster%2F301-vmss-low-pri-bottle-hybrid-autoscale%2Fazuredeploy.jsonn" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fzivraf%2FLowPri%2Fmaster%2F301-vmss-low-pri-bottle-hybrid-autoscale%2Fazuredeploy.jsonn" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
