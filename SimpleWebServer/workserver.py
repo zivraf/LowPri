@@ -33,7 +33,7 @@ worker_thread.start()
 
 def writebody():
     body = '<html><head><title>Work interface - build</title></head>'
-    body += '<body><h2>Worker interface on ' + hostname + '</h2><ul><h3>'
+    body += '<body><h2>Worker interface on ' + socket.gethostname() + '</h2><ul><h3>'
 
     if keepworking == False:
         body += '<br/>Worker thread is not running. <a href="./do_work">Start work</a><br/>'
