@@ -189,7 +189,7 @@
         "upgradePolicy": {
           "mode": "Manual"
         },
-        "singlePlacementGroup": "false"
+        "singlePlacementGroup": "false",
         "virtualMachineProfile": {
           "storageProfile": {
             "osDisk": {
