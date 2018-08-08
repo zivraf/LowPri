@@ -1,11 +1,12 @@
-### Low-priority, delete on eviction, and autoscale with no rules demo app on Ubuntu 16.04 ###
+### Low-priority, delete on eviction, standrard SLB, and autoscale with no rules demo app on Ubuntu 16.04 ###
 
 A Low-priority VM scale set (spanning tenants) with eviction policy set to delete and autoscaling with a Python Bottle server to do some fake work. 
 
 - Spanning VMSS is meant to support large deployments. However, combined with low-priority, it enables using capacity from all capacity in the region (or Availability Zone).
 - Autoscaling without any scaling rules (just setting the minimum) will compensate for every evicted VM. 
+- Standard SLB to support spanning tenants
 - NOTE: Using autoscaling require setting eviction policy to 'delete'.
-With evision policy set to delete, autoscaling will compensate for evicted (deleted) VMs in the scale set. 
+With eviction policy set to delete, autoscaling will compensate for evicted (deleted) VMs in the scale set. 
  
 - After it is deployed look at the resource group public IP address resource (in portal or resources explorer). Get the IP or domain name.
 - Browse to the website of vm#0 (port 9000), which shows the current back-end VM name.

@@ -198,7 +198,7 @@
             "imageReference": "[variables('imageReference')]"
           },
           "priority": "Low",
-          "evictionPolicy": "deallocate",
+          "evictionPolicy": "delete",
           "osProfile": {
             "computerNamePrefix": "[parameters('vmssName')]",
             "adminUsername": "[parameters('adminUsername')]",
