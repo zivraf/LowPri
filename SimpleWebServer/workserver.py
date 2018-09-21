@@ -10,8 +10,8 @@ from bottle import route, run
 
 # for STD SLB we listen on all addresses
 hostname = "0.0.0.0"
-# hostname = socket.gethostname()
-hostport = 80
+hostname = socket.gethostname()
+# hostport = 80
 keepworking = False  # boolean to switch worker thread on or off
 
 
