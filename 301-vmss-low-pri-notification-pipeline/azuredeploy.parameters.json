@@ -19,10 +19,10 @@
       "value": "{yourPasswordgoeshere}"
     },
     "eventGridTopicEndpoint": {
-      "value": "lowprievictiontopic.westus2-1.eventgrid.azure.net"
+      "value": "{eventGridTopicName}"
     },
     "eventGridKey": {
-      "value": "5j+amHL8HW7eYdDbQp4/EnlwwQFFPVD7xEqqRj91BrU="
+      "value": " {eventGridKey}"
     }
   }
 }
