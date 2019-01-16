@@ -267,7 +267,7 @@
                     
                   },
                   "protectedSettings": {
-                    "commandToExecute": "bash install-scheduledEventExtention-ubuntu.sh lowprievictiontopic.westus2-1.eventgrid.azure.net 5j+amHL8HW7eYdDbQp4/EnlwwQFFPVD7xEqqRj91BrU="
+                    "commandToExecute": "bash install-scheduledEventExtention-ubuntu.sh ' ,parameters('eventGridTopicEndpoint'), ' ', parameters('eventGridKey'))]"
                   }
                 }                
                
