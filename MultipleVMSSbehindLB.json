@@ -1,0 +1,438 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string"
+        },
+        "storageAccountDomain": {
+            "type": "string",
+            "metadata": {
+                "description": "The domain of the storage account to be created."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Unused"
+            }
+        },
+        "dnsName": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS name"
+            }
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "storageLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "Location to deploy"
+            }
+        },
+        "vmssName": {
+            "type": "string",
+            "defaultValue": "vmss1"
+        },
+        "vmssName2": {
+            "type": "string",
+            "defaultValue": "vmss2"
+        },
+        "imagePublisher": {
+            "type": "string",
+            "metadata": {
+                "description": "Image Publisher"
+            }
+        },
+        "imageOffer": {
+            "type": "string",
+            "defaultValue" : "WindowsServer",
+            "metadata": {
+                "description": "Image Offer"
+            }
+        },
+        "imageSKU": {
+            "type": "string",
+            "defaultValue": "2012-R2-Datacenter",
+            "allowedValues": [
+                "2008-R2-SP1",
+                "2012-Datacenter",
+                "2012-R2-Datacenter"
+            ],
+            "metadata": {
+                "description": "Image SKU"
+            }
+        },
+        "instanceCount": {
+            "type": "string",
+            "defaultValue": "2",
+            "metadata": {
+                "description": "Number of VM instances"
+            }
+        }
+    },
+    "variables": {
+        "networkSecurityGroupName": "networkSecurityGroup1",
+        "storageAccountType": "Standard_LRS",
+        "newStorageAccountName2": "[concat(parameters('storageAccountName'), '2')]",
+        "location": "[resourceGroup().location]",
+        "vnetName": "vnet1",
+        "pipName": "pip1",
+        "lbName": "lb1",
+        "pipID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('pipName'))]",
+        "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+        "frontendIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/ip1')]",
+        "backendaddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/addressPool1')]",
+        "inboundNatPoolID": "[concat(variables('lbID'),'/backendAddressPools/natPool1')]",
+        "subnetID": "[concat(variables('vnetID'),'/subnets/subnet1')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountName')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('newStorageAccountName2')]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2016-03-30",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "unblock_all_tcp_rule",
+                        "properties": {
+                            "description": "unblock_all_tcp_rule",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "0-65535",
+                            "destinationPortRange": "0-65535",
+                            "sourceAddressPrefix": "0.0.0.0/0",
+                            "destinationAddressPrefix": "0.0.0.0/0",
+                            "access": "Allow",
+                            "priority": 123,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "unblock_all_tcp_outrule",
+                        "properties": {
+                            "description": "unblock_all_tcp_outrule",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "0-65535",
+                            "destinationPortRange": "0-65535",
+                            "sourceAddressPrefix": "0.0.0.0/0",
+                            "destinationAddressPrefix": "0.0.0.0/0",
+                            "access": "Allow",
+                            "priority": 123,
+                            "direction": "Outbound"
+                        }
+                    },
+                    {
+                        "name": "unblock_all_udp_ports",
+                        "properties": {
+                            "description": "Unblock_all_udp_ports",
+                            "protocol": "Udp",
+                            "sourcePortRange": "0-65535",
+                            "destinationPortRange": "0-65535",
+                            "sourceAddressPrefix": "0.0.0.0/0",
+                            "destinationAddressPrefix": "0.0.0.0/0",
+                            "access": "Allow",
+                            "priority": 125,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },   
+        {
+            "apiVersion": "2017-08-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('pipName')]",
+            "location": "[resourceGroup().location]",
+            "sku":
+            {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsName')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [ "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]" ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "subnet1",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-08-01",
+            "name": "[variables('lbName')]",
+            "type": "Microsoft.Network/loadBalancers",
+            "location": "[resourceGroup().location]",
+            "sku":
+            {
+                "name": "Standard"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('pipName'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "ip1",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[variables('pipID')]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "addressPool1"
+                    }
+                ],
+                "loadbalancingRules": [
+                    {
+                        "name": "lbrule1",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontendIPConfigID')]"
+                            },
+                            "backendaddressPool": {
+                                "id": "[variables('backendaddressPoolID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPort": 50000,
+                            "backendPort": 8080
+                        }
+                    }
+                ],
+                "inboundNatPools": [
+                    {
+                        "name": "natPool1",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontendIPConfigID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 3389,
+                            "frontendPortRangeEnd": 4500,
+                            "backendPort": 3389
+                        }
+                    },
+                    {
+                        "name": "natPool2",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[variables('frontendIPConfigID')]"
+                            },
+                            "protocol": "tcp",
+                            "frontendPortRangeStart": 4501,
+                            "frontendPortRangeEnd": 5500,
+                            "backendPort": 3389
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2015-06-15",
+            "name": "[parameters('vmSSName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "vmsstag1": "Myriad"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName2'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
+            ],
+            "sku": {
+                "name": "Standard_A2",
+                "tier": "Standard",
+                "capacity": "[parameters('instanceCount')]"
+            },
+            "Properties": {
+                "upgradePolicy": {
+                    "mode": "Automatic"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "vhdContainers": [
+                                "[concat('https://', parameters('storageAccountName'), '.blob.', parameters('storageAccountDomain'), '/vmss11')]",
+                                "[concat('https://', variables('newStorageAccountName2'), '.blob.', parameters('storageAccountDomain'), '/vmss12')]"
+                            ],
+                            "name": "vmssosdisk",
+                            "caching": "ReadOnly",
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[parameters('imagePublisher')]",
+                            "offer": "[parameters('imageOffer')]",
+                            "sku": "[parameters('imageSKU')]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[parameters('vmSSName')]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic1",
+                                "properties": {
+                                    "primary": "true",
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ip1",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('vnetName'), '/subnets/subnet1')]"
+                                                },
+                                                "loadBalancerInboundNatPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/inboundNatPools/natPool1')]"
+                                                    }
+                                                ],
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/backendAddressPools/addressPool1')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },    
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2015-06-15",
+            "name": "[parameters('vmSSName2')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "vmsstag1": "Myriad"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName2'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
+                "[concat('Microsoft.Network/loadBalancers/', variables('lbName'))]"
+            ],
+            "sku": {
+                "name": "Standard_A2",
+                "tier": "Standard",
+                "capacity": "[parameters('instanceCount')]"
+            },
+            "Properties": {
+                "upgradePolicy": {
+                    "mode": "Automatic"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "vhdContainers": [
+                                "[concat('https://', parameters('storageAccountName'), '.blob.', parameters('storageAccountDomain'), '/vmss21')]",
+                                "[concat('https://', variables('newStorageAccountName2'), '.blob.', parameters('storageAccountDomain'), '/vmss22')]"
+                            ],
+                            "name": "vmssosdisk",
+                            "caching": "ReadOnly",
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[parameters('imagePublisher')]",
+                            "offer": "[parameters('imageOffer')]",
+                            "sku": "[parameters('imageSKU')]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[parameters('vmSSName2')]",
+                        "adminUsername": "[parameters('adminUsername')]",
+                        "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic1",
+                                "properties": {
+                                    "primary": "true",
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ip1",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('vnetName'), '/subnets/subnet1')]"
+                                                },
+                                                "loadBalancerInboundNatPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/inboundNatPools/natPool2')]"
+                                                    }
+                                                ],
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/backendAddressPools/addressPool1')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

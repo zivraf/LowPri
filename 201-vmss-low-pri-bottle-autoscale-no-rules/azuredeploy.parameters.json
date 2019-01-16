@@ -7,7 +7,7 @@
     },
     
     "vmssName": {
-      "value": "lpvmss"
+      "value": "low-pri"
     },
     "instanceCount": {
       "value": 20

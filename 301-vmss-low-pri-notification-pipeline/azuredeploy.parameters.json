@@ -1,0 +1,28 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmSku": {
+      "value": "Standard_D2_v3"
+    },
+    
+    "vmssName": {
+      "value": "lpsset1"
+    },
+    "instanceCount": {
+      "value": 5
+    },
+    "adminUsername": {
+      "value": "{your usernamegoeshere}"
+    },
+    "adminPassword": {
+      "value": "{yourPasswordgoeshere}"
+    },
+    "eventGridTopicEndpoint": {
+      "value": "lowprievictiontopic.westus2-1.eventgrid.azure.net"
+    },
+    "eventGridKey": {
+      "value": "5j+amHL8HW7eYdDbQp4/EnlwwQFFPVD7xEqqRj91BrU="
+    }
+  }
+}
